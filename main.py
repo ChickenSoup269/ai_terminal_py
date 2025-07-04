@@ -1,72 +1,103 @@
 import os
 import time
-from datetime import datetime
-import google.generativeai as genai
+from InquirerPy import inquirer
+from pyfiglet import Figlet
 from dotenv import load_dotenv
-from colorama import init, Fore, Style
-from tabulate import tabulate
+from colorama import Fore, init
+from terminaltexteffects.effects import effect_rain
+import google.generativeai as genai
+from datetime import datetime
 
-# Khởi động colorama
+# Init
 init(autoreset=True)
-
-# Hàm gõ từng ký tự
-def type_effect(text, delay=0.02):
-    for char in text:
-        print(char, end="", flush=True)
-        time.sleep(delay)
-    print()
-
-# Hàm in bảng nếu phát hiện có định dạng Markdown
-def try_print_table(text):
-    lines = text.strip().splitlines()
-    table_lines = [line for line in lines if "|" in line]
-
-    if len(table_lines) >= 2 and "---" in table_lines[1]:
-        headers = [h.strip() for h in table_lines[0].split("|")[1:-1]]
-        rows = [
-            [cell.strip() for cell in row.split("|")[1:-1]]
-            for row in table_lines[2:]
-        ]
-        print(f"{Fore.YELLOW}\n📊 Bảng dữ liệu:")
-        print(tabulate(rows, headers=headers, tablefmt="grid"))
-        return True
-    return False
-
-# Load API key từ .env
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=API_KEY)
 
-# Khởi tạo mô hình + chat session
-model = genai.GenerativeModel("gemini-2.0-flash")
-chat = model.start_chat(history=[])
+# Hiển thị tiêu đề bằng hiệu ứng terminal-text-effects
+def print_banner():
+    os.system("cls" if os.name == "nt" else "clear")
+    fig = Figlet(font='big')
+    ascii_text = fig.renderText("Gemini AI")
+    
+    # Hiệu ứng chữ (có thể đổi typewriter thành wave, shake, jitter, bounce...)
+    effect = effect_rain.Rain(ascii_text)
+    with effect.terminal_output() as terminal:
+        for frame in effect:
+            terminal.print(frame)
+    print(Fore.YELLOW + "Phiên bản: 1.0.0\n")
 
-print(f"{Fore.CYAN}🤖 Gemini Chat - Nhập 'exit' để thoát")
-print(f"{Fore.CYAN}{'-'*50}")
+# Hiệu ứng loading
+def loading(msg="Đang tải", dots=3):
+    print(Fore.YELLOW + msg, end="", flush=True)
+    for _ in range(dots):
+        print(".", end="", flush=True)
+        time.sleep(0.3)
+    print()
 
-while True:
-    user_input = input(f"{Fore.GREEN}👤 Bạn [{datetime.now().strftime('%H:%M')}]: {Style.RESET_ALL}")
-    if user_input.lower() in ["exit", "quit"]:
-        print(f"{Fore.YELLOW}🚪 Đã thoát.")
-        break
+# Trò chuyện
+def start_chat():
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    chat = model.start_chat(history=[])
 
-    try:
-        print(f"{Fore.MAGENTA}🤖 Gemini đang trả lời...", end="\r", flush=True)
+    while True:
+        user_input = input(Fore.GREEN + f"👤 Bạn [{datetime.now().strftime('%H:%M')}]: ")
+        if user_input.lower() in ["exit", "quit", "thoat"]:
+            print(Fore.YELLOW + "👋 Kết thúc.")
+            break
+
+        loading("🤖 Gemini đang trả lời")
         response = chat.send_message(user_input)
+        print(Fore.CYAN + f"🤖 Gemini [{datetime.now().strftime('%H:%M')}]:", response.text.strip())
+        print(Fore.YELLOW + "-" * 50)
 
-        now = datetime.now().strftime('%H:%M')
-        content = response.text.strip()
+# Cài đặt giao diện
+def settings_menu():
+    theme = inquirer.select(
+        message="🎨 Chọn theme màu:",
+        choices=[
+            {"name": "Mặc định (Cyan)", "value": Fore.CYAN},
+            {"name": "Xanh Dương", "value": Fore.BLUE},
+            {"name": "Vàng", "value": Fore.YELLOW},
+            {"name": "Xanh Lá", "value": Fore.GREEN},
+        ],
+    ).execute()
+    print(theme + "✅ Đã chọn theme mới!")
+    input("⏎ Nhấn Enter để quay lại menu...")
 
-        print(f"\n{Fore.BLUE}{'-'*40}")
-        print(f"{Fore.GREEN}👤 Bạn [{now}]: {user_input}")
-        print(f"{Fore.BLUE}{'-'*40}")
-        print(f"{Fore.CYAN}🤖 Gemini [{now}]:", end=" ")
+# Xem lịch sử
+def show_history():
+    print(Fore.YELLOW + "\n📜 Lịch sử trò chuyện:\n")
+    if os.path.exists("chat_history.txt"):
+        with open("chat_history.txt", "r", encoding="utf-8") as f:
+            print(f.read())
+    else:
+        print("📭 Không có lịch sử.")
+    input("⏎ Nhấn Enter để quay lại menu...")
 
-        # Nếu là bảng, in bảng; nếu không, dùng type_effect
-        if not try_print_table(content):
-            type_effect(content)
+# Chạy menu chính
+def main():
+    while True:
+        print_banner()
+        choice = inquirer.select(
+            message="🎮 Chọn một tuỳ chọn bằng ↑ ↓ và Enter:",
+            choices=[
+                {"name": "▶️ Bắt đầu trò chuyện", "value": "chat"},
+                {"name": "📜 Xem lịch sử", "value": "history"},
+                {"name": "🎨 Cài đặt giao diện", "value": "settings"},
+                {"name": "❌ Thoát", "value": "exit"},
+            ],
+        ).execute()
 
-        print(f"{Fore.BLUE}{'-'*40}\n")
+        if choice == "chat":
+            start_chat()
+        elif choice == "history":
+            show_history()
+        elif choice == "settings":
+            settings_menu()
+        elif choice == "exit":
+            print(Fore.RED + "👋 Hẹn gặp lại!")
+            break
 
-    except Exception as e:
-        print(f"{Fore.RED}⚠️ Lỗi: {e}")
+if __name__ == "__main__":
+    main()

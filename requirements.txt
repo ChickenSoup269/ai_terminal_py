@@ -1,0 +1,6 @@
+google-generativeai
+InquirerPy
+pyfiglet
+colorama
+python-dotenv
+terminal-text-effects
