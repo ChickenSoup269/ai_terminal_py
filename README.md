@@ -48,3 +48,5 @@ Chạy ứng dụng
 ```bash
 python main.py
 ```
+
+Hình ảnh
