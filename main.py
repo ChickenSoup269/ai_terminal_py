@@ -82,10 +82,10 @@ def main():
         choice = inquirer.select(
             message="🎮 Chọn một tuỳ chọn bằng ↑ ↓ và Enter:",
             choices=[
-                {"name": "▶️ Bắt đầu trò chuyện", "value": "chat"},
-                {"name": "📜 Xem lịch sử", "value": "history"},
-                {"name": "🎨 Cài đặt giao diện", "value": "settings"},
-                {"name": "❌ Thoát", "value": "exit"},
+                {"name": "Bắt đầu trò chuyện", "value": "chat"},
+                {"name": "Xem lịch sử", "value": "history"},
+                {"name": "Cài đặt giao diện", "value": "settings"},
+                {"name": "Thoát", "value": "exit"},
             ],
         ).execute()
 
