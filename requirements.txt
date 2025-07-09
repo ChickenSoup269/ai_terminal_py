@@ -4,3 +4,5 @@ pyfiglet
 colorama
 python-dotenv
 terminal-text-effects
+tabulate
+rich
