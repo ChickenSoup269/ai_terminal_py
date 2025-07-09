@@ -24,20 +24,20 @@ git clone https://github.com/your-username/gemini-cli-chatbot.git
 cd gemini-cli-chatbot
 ```
 
-2. Tạo môi trường ảo (khuyến nghị)
+### 2. Tạo môi trường ảo (khuyến nghị)
 
 ```bash
 python -m venv venv
 source venv/bin/activate  # Hoặc venv\Scripts\activate trên Windows
 ```
 
-3. Cài đặt thư viện
+### 3. Cài đặt thư viện
 
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Tạo file .env trong thư mục gốc, thêm API key của bạn:
+### 4. Tạo file .env trong thư mục gốc, thêm API key của bạn:
 
 ```bash
 GEMINI_API_KEY=your_gemini_api_key_here
@@ -49,4 +49,10 @@ Chạy ứng dụng
 python main.py
 ```
 
-Hình ảnh
+### Screenshots
+
+<img src="./images/ezgif.com-speed.gif" alt="drawing" width="500">
+
+<img src="./images/Screenshot 2025-07-09 222053.png" alt="drawing" width="500">
+
+<img src="./images/Screenshot 2025-07-09 222135.png" alt="drawing" width="500">
