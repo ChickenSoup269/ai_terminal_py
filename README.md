@@ -51,8 +51,12 @@ python main.py
 
 ### Screenshots
 
+<p align="center">
 <img src="./images/ezgif.com-speed.gif" alt="drawing" width="500">
-
+</p>
+<p align="center">
 <img src="./images/Screenshot 2025-07-09 222053.png" alt="drawing" width="500">
-
+</p>
+<p align="center">
 <img src="./images/Screenshot 2025-07-09 222135.png" alt="drawing" width="500">
+</p>
