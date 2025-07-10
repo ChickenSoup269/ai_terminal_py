@@ -20,7 +20,7 @@ response_text = None
 response_done = threading.Event()
 
 # Kiểm tra và hỏi API Key nếu chưa có
-def check_api_key():
+def check_user_and_api():
     env_path = Path(".env")
 
     if not env_path.exists():
@@ -30,29 +30,38 @@ def check_api_key():
     load_dotenv()
     current_key = os.getenv("GEMINI_API_KEY")
     current_model = os.getenv("GEMINI_MODEL")
+    user_name = os.getenv("USER_NAME")
 
-    if not current_key or not current_model:
-        new_key = input("🔑 Nhập API Key của bạn: ").strip()
-        model_name = input("🤖 Nhập tên model AI (vd: gemini-2.0): ").strip()
-       
+    # Nếu thiếu bất kỳ biến nào thì hỏi người dùng
+    if not current_key or not current_model or not user_name:
+        if not user_name:
+            user_name = input("🧑 Nhập tên của bạn (nickname): ").strip()
+        if not current_key:
+            current_key = input("🔑 Nhập API Key của bạn: ").strip()
+        if not current_model:
+            current_model = input("🤖 Nhập tên model AI (vd: gemini-2.0): ").strip()
+
         with open(env_path, "a", encoding="utf-8") as f:
-            f.write(f"GEMINI_API_KEY={new_key}\n")
-            f.write(f"GEMINI_MODEL={model_name}\n")
+            if user_name:
+                f.write(f"USER_NAME={user_name}\n")
+            if current_key:
+                f.write(f"GEMINI_API_KEY={current_key}\n")
+            if current_model:
+                f.write(f"GEMINI_MODEL={current_model}\n")
 
-        # In bảng xác nhận
-        table = [
-            ["GEMINI_API_KEY", new_key[:6] + "..." + new_key[-4:]],
-            ["GEMINI_MODEL", model_name],
-        ]
         print(Fore.GREEN + "\n✅ Đã lưu thông tin:")
+        table = [
+            ["USER_NAME", user_name],
+            ["GEMINI_API_KEY", current_key[:6] + "..." + current_key[-4:]],
+            ["GEMINI_MODEL", current_model],
+        ]
         print(tabulate(table, headers=["Biến", "Giá trị"], tablefmt="rounded_grid"))
         print("🔁! Vui lòng chạy lại chương trình để sử dụng.\n")
-
         time.sleep(1)
         exit()
 
-    # Nạp lại sau khi lưu
-    load_dotenv()
+    load_dotenv()  # Nạp lại nếu vừa ghi thêm
+
 
 # Chỉ fix hiển thị ** in đậm **
 def markdown_to_terminal(text):
@@ -78,7 +87,7 @@ def print_banner():
     with effect.terminal_output() as terminal:
         for frame in effect:
             terminal.print(frame)
-    print(Fore.YELLOW + "Phiên bản: 1.1.1 \n")
+    print(Fore.YELLOW + "Phiên bản: 1.1.2 \n")
   
 def get_response(chat, user_input):
     global response_text
@@ -102,18 +111,18 @@ def loading(msg="Đang tải"):
 
 # Bắt đầu chat
 def start_chat():
+    USER_NAME = os.getenv("USER_NAME") or "Bạn"
     model = genai.GenerativeModel(MODEL_NAME)
     chat = model.start_chat(history=[])
     history = []
 
     while True:
-        user_input = input(f"👤 Bạn ({datetime.now().strftime('%H:%M')}): ")
+        user_input = input(f"👤 {USER_NAME} ({datetime.now().strftime('%H:%M')}): ")
         if user_input.lower() in ["exit", "quit", "thoat"]:
             confirm_save_history(history)  # Dùng history đúng
             break
 
         response_done.clear()
-        response_text = None
 
         loading("🤖 Gemini đang trả lời")
 
@@ -269,7 +278,7 @@ def convert_text_to_figlet():
 # Chạy menu chính
 def main():
     # Gọi hàm kiểm tra API
-    check_api_key()
+    check_user_and_api()
     while True:
         print_banner()
         choice = inquirer.select(
